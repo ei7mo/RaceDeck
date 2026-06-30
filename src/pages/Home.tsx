@@ -5,7 +5,7 @@ function Home() {
   return (
     <>
       <Navbar />
-      <main className="grid grid-cols-4 grid-rows-6 gap-4 text-txt-primary ml-32 mr-32 mt-7 mb-7">
+      <main className="text-txt-primary grid grid-cols-1 md:grid-cols-2 md:grid-row-11 xl:grid-cols-4 xl:grid-rows-6 gap-10 my-7 mx-6">
         <RaceCard />
       </main>
     </>
