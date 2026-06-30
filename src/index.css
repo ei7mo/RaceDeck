@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+@theme {
+  --color-nav: #0b0b0f;
+  --color-card: #1a1a22;
+  --color-f1-red: #e10600;
+  --color-txt-primary: #f5f5f7;
+  --color-txt-secondary: #9a9aa5;
+  --color-next-race: #ffb800;
+  --color-finshed-race: #27c93f;
+
+  --font-header: "Rajdhani", sans-serif;
+}
+
+body {
+  background-color: #121217;
+  font-family: "Inter", sans-serif;
+}
