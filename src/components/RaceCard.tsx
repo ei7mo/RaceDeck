@@ -6,6 +6,15 @@ import { customList } from "country-codes-list";
 function RaceCard() {
   const [races, setRaces] = useState<Array<Race>>([]);
 
+  useEffect(() => {
+    const loadRaces = async () => {
+      const data = await getRaces();
+      setRaces(data);
+    };
+
+    loadRaces();
+  }, []);
+
   const codeByCountry = useMemo(
     () => customList("countryNameEn", "{countryCode}"),
     [],
@@ -17,9 +26,15 @@ function RaceCard() {
     UAE: "AE",
   };
 
+  const now = Date.now();
+  const nextRound = races.find(
+    (race) => getLocalRaceTime(race.date, race.time).start.getTime() >= now,
+  )?.round;
+
   function getLocalRaceTime(date: string, time: string) {
     const start = new Date(`${date}T${time}`);
     return {
+      start,
       date: start.toLocaleDateString(undefined, {
         weekday: "short",
         day: "numeric",
@@ -32,37 +47,42 @@ function RaceCard() {
     };
   }
 
-  useEffect(() => {
-    const loadRaces = async () => {
-      const data = await getRaces();
-      setRaces(data);
-    };
-
-    loadRaces();
-  }, []);
-
   return (
     <>
       {races.map((race) => {
         const country = race.Circuit.Location.country;
         const code = codeByCountry[country] ?? NAME_FALLBACK[country];
         const local = getLocalRaceTime(race.date, race.time);
+        const isNext = race.round === nextRound;
+        const isFinished = local.start.getTime() < now;
+
+        const border = isNext
+          ? "border-next-race shadow-next-race animate-pulse-glow"
+          : isFinished
+            ? "border-finshed-race shadow-finshed-race"
+            : "border-border";
 
         return (
           <div
-            className="bg-card flex flex-col items-center justify-between"
+            className={`bg-card w-full h-80 flex flex-col justify-between items-center p-6 rounded-xl border-3 ${border} shadow-lg hover:-translate-y-4 transition`}
             key={race.round}
           >
-            <h1 className="text-2xl mt-2.5">{race.raceName}</h1>
+            <h1 className="text-2xl">{race.raceName}</h1>
             {code && (
               <img
                 src={`https://flagcdn.com/w80/${code.toLowerCase()}.png`}
                 alt={country}
               />
             )}
-            <p className="mt-2.5 mb-6">{race.Circuit.circuitName}</p>
-            <span>{race.date}</span>
-            <span className="mb-2.5">{local.time}</span>
+            <p className="text-txt-secondary">{race.Circuit.circuitName}</p>
+            <div className="flex flex-col items-center bg-f1-red px-5 py-2 rounded-xl shadow-md border-3 border-border">
+              <span className="text-xs font-medium uppercase tracking-wider opacity-80">
+                {local.date}
+              </span>
+              <span className="font-header text-2xl font-bold leading-tight">
+                {local.time}
+              </span>
+            </div>
           </div>
         );
       })}
