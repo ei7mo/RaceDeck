@@ -5,6 +5,7 @@ A client-side Formula 1 season dashboard built with React. Browse the full race 
 🔗 **[Live Demo](https://racedeck.netlify.app/)** &nbsp;•&nbsp; 💻 **[Source Code](https://github.com/ei7mo/RaceDeck)**
 
 ![Screenshot](https://i.postimg.cc/ZY1dLy76/image.png)
+![Screenshot](https://i.postimg.cc/c44VXrvY/image.png)
 
 ---
 
