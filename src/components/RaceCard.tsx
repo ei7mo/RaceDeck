@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { getRaces } from "../services/api";
 import type { Race } from "../types/raceType";
 import { customList } from "country-codes-list";
+import { Link } from "react-router-dom";
 
 const NAME_FALLBACK: Record<string, string> = {
   USA: "US",
@@ -124,7 +125,8 @@ function RaceCard() {
         const styles = STATUS_STYLES[status];
 
         return (
-          <section
+          <Link
+            to={`/racedetails/${race.round}`}
             key={race.round}
             className={`flex h-full flex-col justify-between gap-4 rounded-2xl border-2 bg-card p-5 shadow-lg transition duration-300 hover:-translate-y-2 ${styles.card}`}
           >
@@ -169,7 +171,7 @@ function RaceCard() {
                 </p>
               </div>
             </div>
-          </section>
+          </Link>
         );
       })}
     </>
