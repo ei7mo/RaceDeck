@@ -25,3 +25,8 @@ export async function getRaces(): Promise<Race[]> {
     throw err;
   }
 }
+
+export async function getRaceByRound(round: string): Promise<Race | undefined> {
+  const races = await getRaces();
+  return races.find((race) => race.round === round);
+}
