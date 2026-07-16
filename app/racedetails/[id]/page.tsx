@@ -1,138 +1,46 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import { customList } from "country-codes-list";
-import { getRaceByRound } from "../services/api";
-import type { Race } from "../types/raceType";
+import Link from "next/link";
+import Image from "next/image";
+import { notFound } from "next/navigation";
+import { getRaceByRound } from "@/apis/api";
+import {
+  getCountryCode,
+  buildSchedule,
+  groupSessionsByDay,
+  formatTime,
+} from "@/lib/raceHelpers";
 
-const NAME_FALLBACK: Record<string, string> = {
-  USA: "US",
-  UK: "GB",
-  UAE: "AE",
-};
+async function Page({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const race = await getRaceByRound(id);
 
-const SESSION_DEFS = [
-  { key: "FirstPractice", label: "Practice 1" },
-  { key: "SecondPractice", label: "Practice 2" },
-  { key: "ThirdPractice", label: "Practice 3" },
-  { key: "SprintQualifying", label: "Sprint Qualifying" },
-  { key: "Sprint", label: "Sprint" },
-  { key: "Qualifying", label: "Qualifying" },
-] as const;
-
-type SessionEntry = { label: string; start: Date; isRace: boolean };
-
-const toDate = (date: string, time: string) => new Date(`${date}T${time}`);
-
-const formatTime = (d: Date) =>
-  d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
-
-const formatDay = (d: Date) =>
-  d.toLocaleDateString(undefined, {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-  });
-
-function buildSchedule(race: Race): SessionEntry[] {
-  const entries: SessionEntry[] = [];
-
-  for (const { key, label } of SESSION_DEFS) {
-    const session = race[key];
-    if (session) {
-      entries.push({
-        label,
-        start: toDate(session.date, session.time),
-        isRace: false,
-      });
-    }
-  }
-
-  entries.push({
-    label: "Race",
-    start: toDate(race.date, race.time),
-    isRace: true,
-  });
-
-  return entries.sort((a, b) => a.start.getTime() - b.start.getTime());
-}
-
-function RaceDetails() {
-  const { id } = useParams();
-  const [race, setRace] = useState<Race | undefined>();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-
-  useEffect(() => {
-    if (!id) return;
-    getRaceByRound(id)
-      .then(setRace)
-      .catch(() => setError(true))
-      .finally(() => setLoading(false));
-  }, [id]);
-
-  const codeByCountry = useMemo(
-    () => customList("countryNameEn", "{countryCode}"),
-    [],
-  );
-
-  const backLink = (
-    <Link
-      to="/"
-      className="text-sm text-txt-secondary transition hover:text-txt-primary"
-    >
-      ← Back to calendar
-    </Link>
-  );
-
-  if (loading) {
-    return (
-      <main className="mx-auto max-w-2xl px-6 py-10 text-center text-txt-secondary">
-        Loading race…
-      </main>
-    );
-  }
-
-  if (error || !race) {
-    return (
-      <main className="mx-auto max-w-2xl px-6 py-10 text-center">
-        <p className="text-f1-red">
-          {error ? "Couldn't load this race." : "Race not found."}
-        </p>
-        <div className="mt-4">{backLink}</div>
-      </main>
-    );
-  }
+  if (!race) notFound();
 
   const country = race.Circuit.Location.country;
   const locality = race.Circuit.Location.locality;
-  const code = codeByCountry[country] ?? NAME_FALLBACK[country];
+  const code = getCountryCode(country);
   const isSprintWeekend = Boolean(race.Sprint);
 
   const schedule = buildSchedule(race);
   const now = Date.now();
   const nextIndex = schedule.findIndex((s) => s.start.getTime() >= now);
-
-  const days: { day: string; items: (SessionEntry & { index: number })[] }[] =
-    [];
-  schedule.forEach((entry, index) => {
-    const day = formatDay(entry.start);
-    let group = days.find((g) => g.day === day);
-    if (!group) {
-      group = { day, items: [] };
-      days.push(group);
-    }
-    group.items.push({ ...entry, index });
-  });
+  const days = groupSessionsByDay(schedule);
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-8 text-txt-primary">
-      {backLink}
+      <Link
+        href="/"
+        className="text-sm text-txt-secondary transition hover:text-txt-primary"
+      >
+        ← Back to calendar
+      </Link>
 
       <header className="mt-6 flex flex-col items-center gap-3 text-center">
         {code && (
-          <img
+          <Image
             src={`https://flagcdn.com/w160/${code.toLowerCase()}.png`}
             alt={`${country} flag`}
+            width={80}
+            height={48}
             className="h-12 w-20 rounded object-cover ring-1 ring-border"
           />
         )}
@@ -206,4 +114,4 @@ function RaceDetails() {
   );
 }
 
-export default RaceDetails;
+export default Page;

@@ -10,14 +10,7 @@
   --color-finshed-race: #27c93f;
   --color-border: #2a2a35;
 
-  --font-header: "Rajdhani", sans-serif;
-
   --animate-pulse-glow: pulse-glow 2s ease-in-out infinite;
-}
-
-body {
-  background-color: #121217;
-  font-family: "Inter", sans-serif;
 }
 
 @keyframes pulse-glow {
