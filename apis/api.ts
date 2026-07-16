@@ -1,6 +1,7 @@
-import type { Race } from "../types/raceType";
+import type { Race } from "@/types/raceType";
 
-const BASE_URL = "https://api.jolpi.ca/ergast/f1/2026/races/";
+const year = new Date().getFullYear();
+const BASE_URL = `https://api.jolpi.ca/ergast/f1/${year}/races/`;
 
 interface ErgastResponse {
   MRData: {
@@ -19,14 +20,15 @@ export async function getRaces(): Promise<Race[]> {
     const data: ErgastResponse = await response.json();
 
     return data.MRData.RaceTable.Races;
-  } catch (err) {
-    console.log("Failed to fetch races:", err);
+  } catch (error) {
+    console.log("Failed to fetch races: ", error);
 
-    throw err;
+    throw error;
   }
 }
 
 export async function getRaceByRound(round: string): Promise<Race | undefined> {
   const races = await getRaces();
+
   return races.find((race) => race.round === round);
 }

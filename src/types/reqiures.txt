@@ -1,8 +1,0 @@
-round
-raceName
-Circuit
-  Location
-    locality
-    country
-date
-time
